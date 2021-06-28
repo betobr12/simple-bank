@@ -10,7 +10,6 @@ class Account extends Model
     protected $table = 'accounts';
     public $timestamps = true;
     protected $fillable = [
-        'id',
         'user_id',
         'cpf_cnpj',
         'agency',
@@ -41,6 +40,9 @@ class Account extends Model
             compns.social_reason    as social_reason,
             compns.fantasy_name     as fantasy_name
         ')
+        ->when($this->account_id, function ($query, $account_id) {
+            return $query->where('accnts.id', '=',  $account_id);
+        })
         ->first();
     }
 }

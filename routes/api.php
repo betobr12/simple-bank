@@ -21,6 +21,7 @@ Route::group(['middleware' => 'auth:api'], function() {
 
     Route::prefix('account')->group(function($id) {
         Route::post('/' , 'AccountController@new');
+        Route::get('/{id}' , 'AccountController@get');
     });
 
     Route::prefix('transaction')->group(function($id) {

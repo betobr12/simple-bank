@@ -7,6 +7,7 @@ use App\Company;
 use App\Libraries\Document;
 use App\Libraries\GenerateAccount;
 use App\Person;
+use App\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -81,5 +82,25 @@ class AccountController extends Controller
         } else {
             return response()->json(array("error" => "Você já possui uma conta", "data" => $account->get()));
         }
+    }
+
+    protected function get($id) {
+
+        if (!$user = Auth::user()) {
+            return response()->json(array("error" => "Usuario não foi autenticado"));
+        }
+
+        if (!Account::where('id','=',$id)->where('user_id','=',$user->id)->first()) {
+            return response()->json(array("error" => "ID informado não pertence a sua conta"));
+        }
+
+        $account                = new Account();
+        $account->account_id    = $id;
+
+        $transactions                = new Transaction();
+        $transactions->account_id    = $id;
+
+        return response()->json(array("data_account" => $account->get(), "transactions" => $transactions->getTransactions()));
+
     }
 }

@@ -29,8 +29,9 @@ class Transaction extends Model
     ];
 
 
-    public function getBalance(){
-        if($this->start_date == ''){
+    public function getBalance()
+    {
+        if ($this->start_date == '') {
             return array('balance' => '0');
         }
         return DB::table('transactions as transctns')
@@ -45,5 +46,31 @@ class Transaction extends Model
             return $query->where('transctns.date', '<',  $start_date);
         })
         ->first();
+    }
+
+    public function getTransactions()
+    {
+        return DB::table('transactions  as transctns')
+        ->selectRaw('
+            transctns.id,
+            transctns.account_id,
+            transctns.user_id,
+            transctns.user_id,
+            transctns.type_transaction_id,
+            transctns.value,
+            transctns.balance,
+            transctns.document,
+            transctns.number_card,
+            transctns.number_phone,
+            transctns.description,
+            transctns.date,
+            transctns.created_at,
+            transctns.updated_at,
+            transctns.deleted_at
+        ')
+        ->when($this->account_id, function ($query, $account_id) {
+            return $query->where('transctns.account_id', '=',  $account_id);
+        })
+        ->get();
     }
 }
