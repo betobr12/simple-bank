@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Account;
+use App\Card;
+use App\CardTransaction;
 use App\Company;
 use App\Libraries\Document;
 use App\Libraries\GenerateAccount;
@@ -100,7 +102,17 @@ class AccountController extends Controller
         $transactions                = new Transaction();
         $transactions->account_id    = $id;
 
-        return response()->json(array("data_account" => $account->get(), "transactions" => $transactions->getTransactions()));
+        $card_transactions                = new CardTransaction();
+        $card_transactions->account_id    = $id;
 
+        $card                = new Card();
+        $card->account_id    = $id;
+
+        return response()->json(array(
+            "data_account"      => $account->get(),
+            "card"              => $card->getCard(),
+            "transactions"      => $transactions->getTransactions(),
+            "card_transactions" => $card_transactions->getCardTransactions())
+        );
     }
 }

@@ -18,7 +18,7 @@ class Card extends Model
         'deleted_at',
     ];
 
-    public function get()
+    public function getCard()
     {
         return DB::table('cards as crd')
         ->selectRaw('

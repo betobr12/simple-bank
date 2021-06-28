@@ -49,17 +49,20 @@ class Transaction extends Model
     public function getTransactions()
     {
         return DB::table('transactions  as transctns')
+        ->leftJoin('users               as usrs',       'usrs.id',       '=','transctns.user_id')
+        ->leftJoin('type_transactions   as typtrnsctn', 'typtrnsctn.id', '=','transctns.type_transaction_id')
         ->selectRaw('
             transctns.id,
             transctns.account_id,
             transctns.user_id,
-            transctns.user_id,
+            usrs.name                  as user_name,
             transctns.type_transaction_id,
             transctns.value,
             transctns.balance,
             transctns.document,
             transctns.number_card,
             transctns.number_phone,
+            typtrnsctn.description      as typtrnsctn_description,
             transctns.description,
             transctns.date,
             transctns.created_at,

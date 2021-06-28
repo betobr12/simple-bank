@@ -40,4 +40,26 @@ class CardTransaction extends Model
         })
         ->first();
     }
+
+    public function getCardTransactions()
+    {
+        return DB::table('card_transactions  as card_transctns')
+        ->selectRaw('
+            card_transctns.id,
+            card_transctns.account_id,
+            card_transctns.user_id,
+            card_transctns.card_id,
+            card_transctns.value,
+            card_transctns.balance,
+            card_transctns.store,
+            card_transctns.date,
+            card_transctns.created_at,
+            card_transctns.updated_at,
+            card_transctns.deleted_at
+        ')
+        ->when($this->account_id, function ($query, $account_id) {
+            return $query->where('card_transctns.account_id', '=',  $account_id);
+        })
+        ->get();
+    }
 }
