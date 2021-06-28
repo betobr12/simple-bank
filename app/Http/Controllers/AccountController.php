@@ -3,83 +3,83 @@
 namespace App\Http\Controllers;
 
 use App\Account;
+use App\Company;
+use App\Libraries\Document;
+use App\Libraries\GenerateAccount;
+use App\Person;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AccountController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    protected function new(Request $request)
     {
-        //
-    }
+        if (!$user = Auth::user()) {
+            return response()->json(array("error" => "Usuario não foi autenticado"));
+        }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
+        $document           = new Document();
+        $cpf_cnpj           = preg_replace( '/[^0-9]/', '', $request->cpf_cnpj);
+        $document->cpf_cnpj = $cpf_cnpj;
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        if (strlen($cpf_cnpj) == 11) {
+            $type = 2;
+            if( !$document->validateCPF($cpf_cnpj) ){
+                return response()->json(['error'=>'CPF/CNPJ inválido']);
+            }
+        } else if (strlen($cpf_cnpj) == 14) {
+            $type = 1;
+            if( !$document->validateCNPJ($cpf_cnpj) ){
+                return response()->json(['error'=>'CPF/CNPJ inválido']);
+            }
+        }else{
+            return response()->json(['error'=>'CPF/CNPJ inválido']);
+        }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Account  $account
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Account $account)
-    {
-        //
-    }
+        if (Account::where('cpf_cnpj','=',$cpf_cnpj)->first()) {
+            return response()->json(['error'=>'CPF/CNPJ Cadastrado para outra conta']);
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Account  $account
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Account $account)
-    {
-        //
-    }
+        if (!$account = Account::where('user_id','=',$user->id)->first()) {
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Account  $account
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Account $account)
-    {
-        //
-    }
+            $generate_account             = new GenerateAccount();
+            $generate_account->cpf_cnpj   = $cpf_cnpj;
+            $generate_account->id         = $user->id;
+            $generate_account->date       = $user->created_at;
+            $account_data                 = $generate_account->accountNumber();
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Account  $account
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Account $account)
-    {
-        //
+            if ($account = Account::create([
+                'user_id'           => $user->id,
+                'cpf_cnpj'          => $request->cpf_cnpj,
+                'agency'            => 1,
+                'type_id'           => $type,
+                'number_account'    => $account_data->account_number,
+                'digit'             => $account_data->digit,
+                'created_at'        => \Carbon\Carbon::now(),
+            ])){
+                if ($account->type_id == 1) {
+                    if (Company::create([
+                        'account_id'    => $account->id,
+                        'user_id'       => $account->user_id,
+                        'social_reason' => $request->social_reason,
+                        'fantasy_name'  => $request->fantasy_name,
+                        'created_at'        => \Carbon\Carbon::now()
+                    ])){
+                        return response()->json(array("success" => "Conta tipo Company criada com sucesso", "data" => $account->get()));
+                    }
+                } else if ($account->type_id == 2) {
+                    if (Person::create([
+                        'account_id'    => $account->id,
+                        'user_id'       => $account->user_id,
+                        'name'          => $request->name,
+                        'created_at'    => \Carbon\Carbon::now()
+                    ])){
+                        return response()->json(array("success" => "Conta tipo Person criada com sucesso", "data" => $account->get()));
+                    }
+                }
+            }
+        } else {
+            return response()->json(array("error" => "Você já possui uma conta", "data" => $account->get()));
+        }
     }
 }

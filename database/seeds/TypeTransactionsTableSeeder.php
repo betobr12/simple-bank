@@ -28,7 +28,7 @@ class TypeTransactionsTableSeeder extends Seeder
         ]);
 
         DB::table('type_transactions')->insert([
-            'description'   => "Transferência",
+            'description'   => "Compra (Crédito)",
             'created_at'    => \Carbon\Carbon::now(),
         ]);
 
