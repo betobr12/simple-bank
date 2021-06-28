@@ -6,7 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
-
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
@@ -39,4 +39,22 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function get() {
+        return DB::table('users as usr')
+        ->selectRaw("
+            usr.name,
+            usr.email,
+            usr.phone,
+            usr.cpf,
+            usr.created_at
+        ")
+        ->when($this->name, function($query, $name){
+            return $query->where('usr.name', 'LIKE', "%$name%");
+        })
+        ->when($this->cpf, function($query, $cpf){
+            return $query->where('usr.cpf', 'LIKE', "%$cpf%");
+        })
+        ->get();
+    }
 }

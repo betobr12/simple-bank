@@ -105,4 +105,17 @@ class UserController extends Controller
             }
         }
     }
+
+    protected function get(Request $request)
+    {
+        if (!$user = Auth::user()) {
+            return response()->json(array("error" => "Usuario não foi autenticado"));
+        }
+        $user_obj       = new User();
+        $user_obj->name = $request->name;
+        $user_obj->cpf  = $request->cpf;
+        return response()->json($user_obj->get());
+
+
+    }
 }
