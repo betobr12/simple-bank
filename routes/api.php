@@ -32,6 +32,15 @@ Route::group(['middleware' => 'auth:api'], function() {
         Route::post('/cell_recharge' , 'TransactionController@cellRecharge');
         Route::post('/bill_payment'  , 'TransactionController@billPayment');
         Route::post('/transfer'      , 'TransactionController@transfer');
+        Route::post('/card_pay'      , 'TransactionController@cardPay');
+    });
+
+    Route::prefix('card')->group(function() {
+        Route::post('/new_card' , 'CardController@newCard');
+
+        Route::prefix('card_transaction')->group(function() {
+            Route::post('/' , 'CardTransactionController@new');
+        });
     });
 });
 

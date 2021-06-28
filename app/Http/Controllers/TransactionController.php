@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Account;
+use App\Card;
+use App\CardTransaction;
 use App\Libraries\Phone;
 use App\Transaction;
 use Illuminate\Http\Request;
@@ -184,5 +186,62 @@ class TransactionController extends Controller
             }
         }
         return response()->json(array("error" => "Falha ao transferir o dinheiro"));
+    }
+
+    protected function cardPay(Request $request)
+    {
+        if (!$user = Auth::user()) {
+            return response()->json(array("error" => "Usuario não foi autenticado"));
+        }
+
+        if (!$account = Account::where('user_id','=',$user->id)->first()) {
+            return response()->json(array("error" => "Usuario não possui uma conta"));
+        }
+
+        $transaction             = new Transaction();
+        $transaction->account_id = $account->id;
+        $transaction->start_date = \Carbon\Carbon::now();
+        $balance                 = $transaction->getBalance();
+
+        if (!$card = Card::where('user_id','=',$user->id)->where('account_id','=',$account->id)->first()) {
+            return response()->json(array("error" => "Usuario não possui um cartão"));
+        }
+
+        if ($balance->balance < $request->value) {
+            return response()->json(array("error" => "Saldo insuficiente, efetue um deposito"));
+        }
+
+        if (Transaction::create([
+            'account_id'            => $account->id,
+            'user_id'               => $user->id,
+            'type_transaction_id'   => 4,
+            'value'                 => -$request->value,
+            'balance'               => $balance->balance - $request->value,
+            'document'              => $request->document,
+            'number_card'           => $card->number_card,
+            'number_phone'          => null,
+            'description'           => $request->description,
+            'date'                  => \Carbon\Carbon::now(),
+            'created_at'            => \Carbon\Carbon::now(),
+        ])){
+            $card_transaction               = new CardTransaction();
+            $card_transaction->account_id   = $account->id;
+            $card_transaction->start_date   = \Carbon\Carbon::now();
+            $balance_card                   = $card_transaction->getBalanceCard();
+
+            if (CardTransaction::create([
+                'account_id'            => $account->id,
+                'user_id'               => $user->id,
+                'card_id'               => $card->id,
+                'value'                 => $request->value,
+                'balance'               => $balance_card->balance + $request->value,
+                'store'                 => "Pagamento do Cartão",
+                'description'           => $request->description,
+                'date'                  => \Carbon\Carbon::now(),
+                'created_at'            => \Carbon\Carbon::now(),
+            ])){
+                return response()->json(array("success" => "Cartão de credito pago com sucesso"));
+            }
+        }
     }
 }
