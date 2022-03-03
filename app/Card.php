@@ -29,7 +29,8 @@ class Card extends Model
             crd.created_at,
             crd.updated_at,
             crd.deleted_at
-        ')->when($this->account_id, function($query, $account_id){
+        ')
+        ->when($this->account_id, function($query, $account_id){
             return $query->where('crd.account_id', '=', $account_id);
         })
         ->first();

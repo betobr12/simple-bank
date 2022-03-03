@@ -15,9 +15,7 @@ class UserController extends Controller
 {
     protected function login(Request $request)
     {
-        $data = $request->all();
-
-        $cpf_cnpj = preg_replace( '/[^0-9]/', '', $data['cpf']);
+        $cpf_cnpj = preg_replace( '/[^0-9]/', '', $request->cpf);
 
         $document           = new Document;
         $document->cpf_cnpj = $cpf_cnpj;
@@ -26,31 +24,27 @@ class UserController extends Controller
             return response()->json(array("error"=>"CPF invalido"));
         }
 
-        $validator = Validator::make($data,[
+        $validator = Validator::make($request->all(),[
             'password' => ['required', 'string'],
         ],[
-            'password.required'     => 'Senha obrigatoria. ',
+            'password.required'     => 'Senha obrigatória. ',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(array("error"=>$validator->errors()));
-        } else {
-            if (Auth::attempt(['cpf' => $cpf_cnpj,'password' => $data['password']])) {
-                $user = auth()->user();
-                $user->token = $user->createToken($cpf_cnpj)->accessToken;
-
-                return response()->json(array("success"=>"Usuario logado com sucesso","user"=>$user));
-            } else {
-                return response()->json(array("error"=>"Usuario ou senha invalido"));
-            }
+            return response()->json(array("error"=>$validator->errors()->first()));
         }
+
+        if (Auth::attempt(['cpf' => $cpf_cnpj, 'password' => $request->password])) {
+            $user = auth()->user();
+            $user->token = $user->createToken($cpf_cnpj)->accessToken;
+            return response()->json(array("success" => "Usuário logado com sucesso", "user" => $user));
+        } 
+        return response()->json(array("error" => "Usuário ou senha invalido"));                
     }
 
     protected function register(Request $request)
     {
-        $data = $request->all();
-
-        $cpf_cnpj = preg_replace( '/[^0-9]/', '', $data['cpf']);
+        $cpf_cnpj = preg_replace( '/[^0-9]/', '', $request->cpf);
 
         $document           = new Document;
         $document->cpf_cnpj = $cpf_cnpj;
@@ -59,63 +53,59 @@ class UserController extends Controller
             return response()->json(array("error"=>"CPF invalido"));
         }
 
-        $validator = Validator::make($data, [
+        $validator = Validator::make($request->all(), [
             'name'      => ['required', 'string', 'max:255'],
             'phone'     => ['required', 'string', 'max:11'],
             'email'     => ['required', 'string', 'email', 'max:255','unique:users'],
             'password'  => ['required', 'string', 'min:4'],
         ],[
-            'name.required'         => 'Nome do usuario obrigatorio',
+            'name.required'         => 'Nome do usuário obrigatorio',
             'name.max'              => 'Caractere maximo para o nome foi ultrapassado',
             'phone.required'        => 'Telefone é obrigatorio',
             'phone.max'             => 'Caractere maximo para o telefone foi ultrapassado',
             'email.required'        => 'Email obrigatorio',
-            'email.unique'          => 'Esse email foi cadastrado para outro usuario',
+            'email.unique'          => 'Esse email foi cadastrado para outro usuário',
             'email.max'             => 'Caractere maximo para o email foi ultrapassado',
             'email.email'           => 'Email invalido',
-            'password.required'     => 'Senha obrigatoria',
+            'password.required'     => 'Senha obrigatória',
             'password.min'          => 'É necessario mais caracteres para senha',
            ]
         );
 
         if ($validator->fails()) {
-            return response()->json(array("error"=>$validator->errors()));
-        } else {
-
-            if (User::where('email','=',$request->email)->first()) {
-                return response()->json(array("error"=>"Esse email foi cadastrado para outro usuario"));
-            }
-
-            if (User::where('cpf','=',$cpf_cnpj)->first()) {
-                return response()->json(array("error"=>"Esse cpf foi cadastrado para outro usuario"));
-            }
-
-            if ($user = User::create([
-                'name'      => $data['name'],
-                'email'     => $data['email'],
-                'cpf'       => $cpf_cnpj,
-                'phone'     => $data['phone'],
-                'password'  => Hash::make($data['password']),
-            ])) {
-                $user->save();
-                $user->token = $user->createToken($request->email)->accessToken;
-                return response()->json(array("success"=>"Usuario registrado com sucesso","user"=>$user));
-            } else {
-                return response()->json(array("error"=>"Erro ao registrar o usuario"));
-            }
+            return response()->json(array("error"=>$validator->errors()->first()));
         }
+
+        if (User::where('email','=',$request->email)->first()) {
+            return response()->json(array("error" => "Esse email foi cadastrado para outro usuário"));
+        }
+
+        if (User::where('cpf','=',$cpf_cnpj)->first()) {
+            return response()->json(array("error" => "Esse cpf foi cadastrado para outro usuário"));
+        }
+
+        if ($user = User::create([
+            'name'      => $request->name,
+            'email'     => $request->email,
+            'cpf'       => $cpf_cnpj,
+            'phone'     => $request->phone,
+            'password'  => Hash::make($request->password),
+        ])) {
+            $user->save();
+            $user->token = $user->createToken($request->email)->accessToken;
+            return response()->json(array("success" => "Usuário registrado com sucesso", "user" => $user));
+        } 
+        return response()->json(array("error"=>"Erro ao registrar o usuário"));
     }
 
     protected function get(Request $request)
     {
         if (!$user = Auth::user()) {
-            return response()->json(array("error" => "Usuario não foi autenticado"));
+            return response()->json(array("error" => "Usuário não foi autenticado"));
         }
         $user_obj       = new User();
         $user_obj->name = $request->name;
         $user_obj->cpf  = $request->cpf;
         return response()->json($user_obj->get());
-
-
     }
 }

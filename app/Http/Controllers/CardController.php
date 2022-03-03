@@ -13,17 +13,16 @@ class CardController extends Controller
 {
     protected function newCard()
     {
-
         if (!$user = Auth::user()) {
-            return response()->json(array("error" => "Usuario não foi autenticado"));
+            return response()->json(array("error" => "Usuário não foi autenticado"));
         }
 
         if (!$account = Account::where('user_id','=',$user->id)->first()) {
-            return response()->json(array("error" => "Usuario não possui uma conta"));
+            return response()->json(array("error" => "Usuário não possui uma conta"));
         }
 
         if ($card_account = Card::where('user_id','=',$user->id)->where('account_id','=',$account->id)->whereNull('deleted_at')->first()) {
-            return response()->json(array("error" => "Usuario já possui um cartão para sua conta"));
+            return response()->json(array("error" => "Usuário já possui um cartão para sua conta"));
         }
 
         $card             = new GenerateCard();

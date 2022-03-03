@@ -15,11 +15,11 @@ class TransactionController extends Controller
     protected function deposit(Request $request)
     {
         if (!$user = Auth::user()) {
-            return response()->json(array("error" => "Usuario não foi autenticado"));
+            return response()->json(array("error" => "Usuário não foi autenticado"));
         }
 
         if (!$account = Account::where('user_id','=',$user->id)->first()) {
-            return response()->json(array("error" => "Usuario não possui uma conta"));
+            return response()->json(array("error" => "Usuário não possui uma conta"));
         }
 
         $transaction             = new Transaction();
@@ -47,11 +47,11 @@ class TransactionController extends Controller
     protected function cellRecharge(Request $request)
     {
         if (!$user = Auth::user()) {
-            return response()->json(array("error" => "Usuario não foi autenticado"));
+            return response()->json(array("error" => "Usuário não foi autenticado"));
         }
 
         if (!$account = Account::where('user_id','=',$user->id)->first()) {
-            return response()->json(array("error" => "Usuario não possui uma conta"));
+            return response()->json(array("error" => "Usuário não possui uma conta"));
         }
 
         $transaction             = new Transaction();
@@ -60,14 +60,14 @@ class TransactionController extends Controller
         $balance                 = $transaction->getBalance();
 
         if ($balance->balance < $request->value) {
-            return response()->json(array("error" => "Saldo insuficiente, efetue um deposito"));
+            return response()->json(array("error" => "Saldo insuficiente, por favor efetue um depósito"));
         }
 
         $phone        = new Phone();
         $phone->phone = $request->phone;
 
         if ($phone->phone() == false) {
-            return response()->json(array("error" => "Numero do celular invalido"));
+            return response()->json(array("error" => "Número do celular inválido"));
         }
 
         if (Transaction::create([
@@ -90,11 +90,11 @@ class TransactionController extends Controller
     protected function billPayment(Request $request)
     {
         if (!$user = Auth::user()) {
-            return response()->json(array("error" => "Usuario não foi autenticado"));
+            return response()->json(array("error" => "Usuário não foi autenticado"));
         }
 
         if (!$account = Account::where('user_id','=',$user->id)->first()) {
-            return response()->json(array("error" => "Usuario não possui uma conta"));
+            return response()->json(array("error" => "Usuário não possui uma conta"));
         }
 
         $transaction             = new Transaction();
@@ -103,7 +103,7 @@ class TransactionController extends Controller
         $balance                 = $transaction->getBalance();
 
         if ($balance->balance < $request->value) {
-            return response()->json(array("error" => "Saldo insuficiente, efetue um deposito"));
+            return response()->json(array("error" => "Saldo insuficiente, efetue um depósito"));
         }
 
         if (Transaction::create([
@@ -126,11 +126,11 @@ class TransactionController extends Controller
     protected function transfer(Request $request)
     {
         if (!$user = Auth::user()) {
-            return response()->json(array("error" => "Usuario não foi autenticado"));
+            return response()->json(array("error" => "Usuário não foi autenticado"));
         }
 
         if (!$account = Account::where('user_id','=',$user->id)->first()) {
-            return response()->json(array("error" => "Usuario não possui uma conta"));
+            return response()->json(array("error" => "Usuário não possui uma conta"));
         }
 
         if (!$account_favored = Account::where('cpf_cnpj','=',$request->cpf_cnpj)->where('agency','=',$request->agency)->where('number_account','=',$request->number_account)->whereNull('deleted_at')->first()) {
@@ -143,11 +143,11 @@ class TransactionController extends Controller
         $balance                 = $transaction->getBalance();
 
         if ($balance->balance < $request->value) {
-            return response()->json(array("error" => "Saldo insuficiente, efetue um deposito"));
+            return response()->json(array("error" => "Saldo insuficiente, efetue um depósito"));
         }
 
         if ($request->cpf_cnpj == $account->cpf_cnpj) {
-            return response()->json(array("error" => "Você não pode transferir dinheiro para o seu proprio CPF/CNPJ"));
+            return response()->json(array("error" => "Você não pode transferir dinheiro para o seu CPF/CNPJ"));
         }
 
         if (Transaction::create([
@@ -182,7 +182,7 @@ class TransactionController extends Controller
                 'date'                  => \Carbon\Carbon::now(),
                 'created_at'            => \Carbon\Carbon::now(),
             ])){
-                return response()->json(array("success" => "Transferencia efetuada com sucesso"));
+                return response()->json(array("success" => "Transferência efetuada com sucesso"));
             }
         }
         return response()->json(array("error" => "Falha ao transferir o dinheiro"));
@@ -191,11 +191,11 @@ class TransactionController extends Controller
     protected function cardPay(Request $request)
     {
         if (!$user = Auth::user()) {
-            return response()->json(array("error" => "Usuario não foi autenticado"));
+            return response()->json(array("error" => "Usuário não foi autenticado"));
         }
 
         if (!$account = Account::where('user_id','=',$user->id)->first()) {
-            return response()->json(array("error" => "Usuario não possui uma conta"));
+            return response()->json(array("error" => "Usuário não possui uma conta"));
         }
 
         $transaction             = new Transaction();
@@ -204,11 +204,11 @@ class TransactionController extends Controller
         $balance                 = $transaction->getBalance();
 
         if (!$card = Card::where('user_id','=',$user->id)->where('account_id','=',$account->id)->first()) {
-            return response()->json(array("error" => "Usuario não possui um cartão"));
+            return response()->json(array("error" => "Usuário não possui um cartão"));
         }
 
         if ($balance->balance < $request->value) {
-            return response()->json(array("error" => "Saldo insuficiente, efetue um deposito"));
+            return response()->json(array("error" => "Saldo insuficiente, efetue um depósito"));
         }
 
         if (Transaction::create([

@@ -13,15 +13,15 @@ class CardTransactionController extends Controller
     protected function new(Request $request)
     {
         if (!$user = Auth::user()) {
-            return response()->json(array("error" => "Usuario não foi autenticado"));
+            return response()->json(array("error" => "Usuário não foi autenticado"));
         }
 
         if (!$account = Account::where('user_id','=',$user->id)->first()) {
-            return response()->json(array("error" => "Usuario não possui uma conta"));
+            return response()->json(array("error" => "Usuário não possui uma conta"));
         }
 
         if (!$card = Card::where('user_id','=',$user->id)->where('account_id','=',$account->id)->first()) {
-            return response()->json(array("error" => "Usuario não possui um cartão"));
+            return response()->json(array("error" => "Usuário não possui um cartão"));
         }
 
         $card_transaction               = new CardTransaction();

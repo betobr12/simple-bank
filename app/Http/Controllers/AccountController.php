@@ -18,7 +18,7 @@ class AccountController extends Controller
     protected function new(Request $request)
     {
         if (!$user = Auth::user()) {
-            return response()->json(array("error" => "Usuario não foi autenticado"));
+            return response()->json(array("error" => "Usuário não foi autenticado"));
         }
 
         $document           = new Document();
@@ -27,7 +27,7 @@ class AccountController extends Controller
 
         if (strlen($cpf_cnpj) == 11) {
             $type = 2;
-            if( !$document->validateCPF($cpf_cnpj) ){
+            if ( !$document->validateCPF($cpf_cnpj) ){
                 return response()->json(['error'=>'CPF/CNPJ inválido']);
             }
         } else if (strlen($cpf_cnpj) == 14) {
@@ -35,7 +35,7 @@ class AccountController extends Controller
             if( !$document->validateCNPJ($cpf_cnpj) ){
                 return response()->json(['error'=>'CPF/CNPJ inválido']);
             }
-        }else{
+        } else {
             return response()->json(['error'=>'CPF/CNPJ inválido']);
         }
 
@@ -89,7 +89,7 @@ class AccountController extends Controller
     protected function get($id) {
 
         if (!$user = Auth::user()) {
-            return response()->json(array("error" => "Usuario não foi autenticado"));
+            return response()->json(array("error" => "Usuário não foi autenticado"));
         }
 
         if (!Account::where('id','=',$id)->where('user_id','=',$user->id)->first()) {
