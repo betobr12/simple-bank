@@ -3,11 +3,11 @@ version: "3.4"
 services:
   web:
     image: ambientum/php:7.4-nginx
-    container_name: idez-web
+    container_name: simple-bank
     volumes:
       - .:/var/www/app:delegated
     ports:
-      - 8000:8080
+      - 8753:8080
     depends_on:
       - postgres
     environment:
@@ -15,17 +15,17 @@ services:
       - COMPOSER_MEMORY_LIMIT=-1
   postgres:
     image: postgres:12-alpine
-    container_name: idez-postgres
+    container_name: simple-bank-postgres
     restart: always
     tty: true
     environment:
-      - POSTGRES_DB=idez
-      - POSTGRES_USER=idez
-      - POSTGRES_PASSWORD=idez
+      - POSTGRES_DB=simple_bank
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
     ports:
       - 5432:5432
     volumes:
-      - idez-data:/var/lib/postgresql/data:delegated
+      - simple-bank-data:/var/lib/postgresql/data:delegated
 volumes:
-  idez-data:
+  simple-bank-data:
     driver: local
