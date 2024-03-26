@@ -34,7 +34,7 @@ class Company extends Model
      */
     public function getCompany()
     {
-        return $this->all();
+        return $this->simpleConsult()->get();
     }
 
     /**
@@ -42,7 +42,7 @@ class Company extends Model
      */
     public function firstCompany()
     {
-        return $this->first();
+        return $this->simpleConsult()->first();
     }
 
     /**
@@ -50,7 +50,7 @@ class Company extends Model
      */
     public function getCompanyPaginate()
     {
-        return $this->paginate(10);
+        return $this->simpleConsult()->paginate(10);
     }
 
     /**
@@ -69,13 +69,18 @@ class Company extends Model
                 company.updated_at,
                 company.deleted_at
             ")
+            ->when($this->company_id, function ($query, $company_id) {
+                return $query->where('company.id', '=', $company_id);
+            })
+            ->when($this->id, function ($query, $id) {
+                return $query->where('company.id', '=', $id);
+            })
             ->when($this->onlyActive, function ($query) {
-                return $query->where('company.account_id');
+                return $query->where('company.deleted_at');
             })
             ->when($this->account_id, function ($query, $accountId) {
                 return $query->where('company.account_id', '=', $accountId);
-            })
-            ->get();
+            });
 
     }
 

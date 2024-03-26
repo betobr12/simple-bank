@@ -2,11 +2,10 @@
 
 namespace App;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
@@ -19,7 +18,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password','phone','cpf'
+        'name', 'email', 'password', 'phone', 'cpf'
     ];
 
     /**
@@ -28,7 +27,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token'
     ];
 
     /**
@@ -37,24 +36,74 @@ class User extends Authenticatable
      * @var array
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'email_verified_at' => 'datetime'
     ];
 
-    public function get() {
+    /**
+     * @return mixed
+     */
+    public function get()
+    {
+        return $this->simpleConsult()
+            ->when($this->name, function ($query, $name) {
+                return $query->where('usr.name', 'LIKE', "%$name%");
+            })
+            ->when($this->cpf, function ($query, $cpf) {
+                return $query->where('usr.cpf', 'LIKE', "%$cpf%");
+            })
+
+            ->get();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUser()
+    {
+        return $this->simpleConsult()
+            ->when($this->name, function ($query, $name) {
+                return $query->where('usr.name', '=', $name);
+            })
+            ->when($this->cpf, function ($query, $cpf) {
+                return $query->where('usr.cpf', '=', $cpf);
+            })
+            ->get();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function firstUser()
+    {
+        return $this->simpleConsult()
+            ->when($this->name, function ($query, $name) {
+                return $query->where('usr.name', 'LIKE', "%$name%");
+            })
+            ->when($this->cpf, function ($query, $cpf) {
+                return $query->where('usr.cpf', 'LIKE', "%$cpf%");
+            })
+            ->first();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function simpleConsult()
+    {
         return DB::table('users as usr')
-        ->selectRaw("
-            usr.name,
-            usr.email,
-            usr.phone,
-            usr.cpf,
-            usr.created_at
-        ")
-        ->when($this->name, function($query, $name){
-            return $query->where('usr.name', 'LIKE', "%$name%");
-        })
-        ->when($this->cpf, function($query, $cpf){
-            return $query->where('usr.cpf', 'LIKE', "%$cpf%");
-        })
-        ->get();
+            ->selectRaw("
+                usr.name,
+                usr.email,
+                usr.phone,
+                usr.cpf,
+                usr.created_at
+            ")
+            ->when($this->id, function ($query, $id) {
+                return $query->where('usr.id', '=', $id);
+            })
+            ->when($this->userValidation, function ($query, $userValidation) {
+                return $query->where('email', '=', $userValidation['email'])
+                    ->orWhere('cpf', '=', $userValidation['cpf']);
+            });
     }
 }
