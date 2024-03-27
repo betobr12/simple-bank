@@ -72,11 +72,11 @@ class Account extends Model
             ->when($this->id, function ($query, $id) {
                 return $query->where('accnts.id', '=', $id);
             })
-            ->when($this->user_id, function ($query, $user_id) {
-                return $query->where('accnts.user_id', '=', $user_id);
-            })
             ->when($this->account_id, function ($query, $account_id) {
                 return $query->where('accnts.id', '=', $account_id);
+            })
+            ->when($this->user_id, function ($query, $user_id) {
+                return $query->where('accnts.user_id', '=', $user_id);
             })
             ->when($this->onlyActive, function ($query) {
                 return $query->whereNull('accnts.deleted_at', );

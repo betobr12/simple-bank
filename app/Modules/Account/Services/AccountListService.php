@@ -47,18 +47,11 @@ class AccountListService implements AccountListServiceInterface
     public function list(int $id): JsonResponse
     {
         $user = auth()->user();
-
-        if ($this->accountRepository->get((object) [
+        if (!$this->accountRepository->get((object) [
             'id' => $id,
             'user_id' => $user->id
         ])) {
             return response()->json(['error' => 'ID informado não pertence a sua conta']);
-        }
-
-        if ($this->accountRepository->get((object) [
-            'user_id' => $user->id
-        ])) {
-            return response()->json(['success' => false, 'error' => 'ID informado não pertence a sua conta']);
         }
 
         $account = new Account();
