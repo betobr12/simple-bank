@@ -26,7 +26,7 @@ class LoginService implements LoginServiceInterface
      * @param $data
      * @return mixed
      */
-    public function handler($data)
+    public function handler($data): JsonResponse
     {
         return $this->loginUser($data);
     }

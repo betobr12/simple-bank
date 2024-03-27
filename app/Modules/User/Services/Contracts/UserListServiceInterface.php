@@ -1,9 +1,9 @@
 <?php
-namespace App\Modules\Login\Services\Contracts;
+namespace App\Modules\User\Services\Contracts;
 
 use Illuminate\Http\JsonResponse;
 
-interface LoginServiceInterface
+interface UserListServiceInterface
 {
     /**
      * @param $data

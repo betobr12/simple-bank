@@ -2,7 +2,9 @@
 
 namespace App\Modules\User\Services;
 
+use PHPUnit\Util\Json;
 use App\Libraries\Document;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -30,7 +32,7 @@ class UserRegisterService implements UserRegisterServiceInterface
      * @param $data
      * @return mixed
      */
-    public function handler($data)
+    public function handler($data): JsonResponse
     {
         return $this->userRegister($data);
     }
@@ -39,7 +41,7 @@ class UserRegisterService implements UserRegisterServiceInterface
      * @param $data
      * @return mixed
      */
-    public function userRegister($data): JsonResponse
+    public function userRegister(Request $data): JsonResponse
     {
         $cpf_cnpj = preg_replace('/[^0-9]/', '', $data->cpf);
 
