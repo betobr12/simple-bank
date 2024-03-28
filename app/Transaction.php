@@ -35,7 +35,8 @@ class Transaction extends Model
     ];
 
     /**
-     * @return mixed
+     * Its numeric to postgresql
+     *
      */
     public function balance()
     {
@@ -55,7 +56,6 @@ class Transaction extends Model
                 return $query->where('transctns.date', '<', $start_date);
             })
             ->first();
-
     }
 
     /**
@@ -77,7 +77,7 @@ class Transaction extends Model
             transctns.document,
             transctns.number_card,
             transctns.number_phone,
-            typtrnsctn.description      as typtrnsctn_description,
+            typtrnsctn.description as typtrnsctn_description,
             transctns.description,
             transctns.date,
             transctns.created_at,
