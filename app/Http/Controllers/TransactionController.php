@@ -6,130 +6,40 @@ use App\Card;
 use App\Account;
 use App\Transaction;
 use App\CardTransaction;
-use App\Libraries\Phone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Modules\Transaction\Services\DepositTransactionService;
+use App\Modules\Transaction\Services\BillPaymentTransactionService;
+use App\Modules\Transaction\Services\CellRechargeTransactionService;
 
 class TransactionController extends Controller
 {
     /**
      * @param Request $request
      */
-    protected function deposit(Request $request)
-    {
-        if (!$user = Auth::user()) {
-            return response()->json(["error" => "Usuário não foi autenticado"]);
-        }
-
-        if (!$account = Account::where('user_id', '=', $user->id)->first()) {
-            return response()->json(["error" => "Usuário não possui uma conta"]);
-        }
-
-        $transaction = new Transaction();
-        $transaction->account_id = $account->id;
-        $transaction->start_date = \Carbon\Carbon::now();
-        $balance = $transaction->getBalance();
-
-        if (Transaction::create([
-            'account_id' => $account->id,
-            'user_id' => $user->id,
-            'type_transaction_id' => 2,
-            'value' => $request->value,
-            'balance' => $balance->balance + $request->value,
-            'document' => $request->document,
-            'number_card' => null,
-            'number_phone' => null,
-            'description' => $request->description,
-            'date' => \Carbon\Carbon::now(),
-            'created_at' => \Carbon\Carbon::now()
-        ])) {
-            return response()->json(["success" => "Deposito efetuado com sucesso"]);
-        }
+    protected function deposit(
+        Request $request,
+        DepositTransactionService $depositTransactionService
+    ) {
+        return $depositTransactionService->handler($request);
     }
 
     /**
      * @param Request $request
      */
-    protected function cellRecharge(Request $request)
-    {
-        if (!$user = Auth::user()) {
-            return response()->json(["error" => "Usuário não foi autenticado"]);
-        }
-
-        if (!$account = Account::where('user_id', '=', $user->id)->first()) {
-            return response()->json(["error" => "Usuário não possui uma conta"]);
-        }
-
-        $transaction = new Transaction();
-        $transaction->account_id = $account->id;
-        $transaction->start_date = \Carbon\Carbon::now();
-        $balance = $transaction->getBalance();
-
-        if ($balance->balance < $request->value) {
-            return response()->json(["error" => "Saldo insuficiente, por favor efetue um depósito"]);
-        }
-
-        $phone = new Phone();
-        $phone->phone = $request->phone;
-
-        if ($phone->phone() == false) {
-            return response()->json(["error" => "Número do celular inválido"]);
-        }
-
-        if (Transaction::create([
-            'account_id' => $account->id,
-            'user_id' => $user->id,
-            'type_transaction_id' => 5,
-            'value' => -$request->value,
-            'balance' => $balance->balance - $request->value,
-            'document' => $request->document,
-            'number_card' => null,
-            'number_phone' => $request->phone,
-            'description' => $request->description,
-            'date' => \Carbon\Carbon::now(),
-            'created_at' => \Carbon\Carbon::now()
-        ])) {
-            return response()->json(["success" => "Recarga de celular efetuada com sucesso"]);
-        }
+    protected function cellRecharge(
+        Request $request,
+        CellRechargeTransactionService $cellRechargeTransactionService
+    ) {
+        return $cellRechargeTransactionService->handler($request);
     }
 
     /**
      * @param Request $request
      */
-    protected function billPayment(Request $request)
+    protected function billPayment(Request $request, BillPaymentTransactionService $billPaymentTransactionService)
     {
-        if (!$user = Auth::user()) {
-            return response()->json(["error" => "Usuário não foi autenticado"]);
-        }
-
-        if (!$account = Account::where('user_id', '=', $user->id)->first()) {
-            return response()->json(["error" => "Usuário não possui uma conta"]);
-        }
-
-        $transaction = new Transaction();
-        $transaction->account_id = $account->id;
-        $transaction->start_date = \Carbon\Carbon::now();
-        $balance = $transaction->getBalance();
-
-        if ($balance->balance < $request->value) {
-            return response()->json(["error" => "Saldo insuficiente, efetue um depósito"]);
-        }
-
-        if (Transaction::create([
-            'account_id' => $account->id,
-            'user_id' => $user->id,
-            'type_transaction_id' => 1,
-            'value' => -$request->value,
-            'balance' => $balance->balance - $request->value,
-            'document' => $request->document,
-            'number_card' => null,
-            'number_phone' => null,
-            'description' => $request->description,
-            'date' => \Carbon\Carbon::now(),
-            'created_at' => \Carbon\Carbon::now()
-        ])) {
-            return response()->json(["success" => "Pagamento de conta feito com sucesso"]);
-        }
+        return $billPaymentTransactionService->handler($request);
     }
 
     /**

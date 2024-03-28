@@ -13,6 +13,10 @@ interface AccountRepositoryInterface extends BaseRepositoryInterface
     /**
      * @param object $data
      */
+    public function firstAccount(object $data);
+    /**
+     * @param object $data
+     */
     public function get(object $data);
 
 }

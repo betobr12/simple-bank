@@ -13,28 +13,28 @@ class TypeTransactionsTableSeeder extends Seeder
     public function run()
     {
         DB::table('type_transactions')->insert([
-            'description'   => "Pagamento de Conta",
-            'created_at'    => \Carbon\Carbon::now(),
+            'description' => "Pagamento de Conta",
+            'created_at' => \Carbon\Carbon::now()
         ]);
 
         DB::table('type_transactions')->insert([
-            'description'   => "Depósito",
-            'created_at'    => \Carbon\Carbon::now(),
+            'description' => "Depósito",
+            'created_at' => \Carbon\Carbon::now()
         ]);
 
         DB::table('type_transactions')->insert([
-            'description'   => "Transferência",
-            'created_at'    => \Carbon\Carbon::now(),
+            'description' => "Transferência",
+            'created_at' => \Carbon\Carbon::now()
         ]);
 
         DB::table('type_transactions')->insert([
-            'description'   => "Compra (Crédito)",
-            'created_at'    => \Carbon\Carbon::now(),
+            'description' => "Compra (Crédito)",
+            'created_at' => \Carbon\Carbon::now()
         ]);
 
         DB::table('type_transactions')->insert([
-            'description'   => "Recarga de Celular",
-            'created_at'    => \Carbon\Carbon::now(),
+            'description' => "Recarga de Celular",
+            'created_at' => \Carbon\Carbon::now()
         ]);
     }
 }

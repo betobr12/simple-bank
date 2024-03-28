@@ -35,13 +35,21 @@ class Account extends Model
      */
     public function get()
     {
-        return $this->simpleConsult()->first();
+        return $this->simpleConsult()->get();
     }
 
     /**
      * @return mixed
      */
     public function getAccount()
+    {
+        return $this->simpleConsult()->get();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function firstAccount()
     {
         return $this->simpleConsult()->first();
     }

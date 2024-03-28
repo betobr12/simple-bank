@@ -3,7 +3,6 @@
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-
 class TypesTableSeeder extends Seeder
 {
     /**
@@ -14,13 +13,13 @@ class TypesTableSeeder extends Seeder
     public function run()
     {
         DB::table('types')->insert([
-            'description'   => "Company",
-            'created_at'    => \Carbon\Carbon::now(),
+            'description' => "Company",
+            'created_at' => \Carbon\Carbon::now()
         ]);
 
         DB::table('types')->insert([
-            'description'   => "Person",
-            'created_at'    => \Carbon\Carbon::now(),
+            'description' => "Person",
+            'created_at' => \Carbon\Carbon::now()
         ]);
     }
 }

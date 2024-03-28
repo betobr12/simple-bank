@@ -43,6 +43,16 @@ class AccountRepository extends BaseRepository implements AccountRepositoryInter
      * @param object $data
      * @return mixed
      */
+    public function firstAccount(object $data)
+    {
+        $this->parameters($data);
+        return $this->model->firstAccount() ?? [];
+    }
+
+    /**
+     * @param object $data
+     * @return mixed
+     */
     public function get(object $data)
     {
         $this->parameters($data);

@@ -5,29 +5,21 @@ namespace App\Modules\Account\Services;
 use App\Card;
 use App\Account;
 use App\Transaction;
-use PHPUnit\Util\Json;
 use App\CardTransaction;
-use App\Libraries\Document;
 use Illuminate\Http\JsonResponse;
 use App\Modules\Account\Services\Contracts\AccountListServiceInterface;
 use App\Modules\Account\Repositories\Contracts\AccountRepositoryInterface;
 
 class AccountListService implements AccountListServiceInterface
 {
-
-    private Document $document;
     private AccountRepositoryInterface $accountRepository;
 
     /**
-     * @param Document $document
      * @param AccountRepositoryInterface $userRepository
      */
     public function __construct(
-        Document $document,
         AccountRepositoryInterface $accountRepository
-
     ) {
-        $this->document = $document;
         $this->accountRepository = $accountRepository;
     }
 
