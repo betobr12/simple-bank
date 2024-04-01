@@ -5,10 +5,10 @@ namespace App\Modules\Transaction\Services;
 use App\Transaction;
 use Illuminate\Http\JsonResponse;
 use App\Modules\Account\Repositories\Contracts\AccountRepositoryInterface;
+use App\Modules\Transaction\Services\Contracts\CreateTransactionServiceInterface;
 use App\Modules\Transaction\Repositories\Contracts\TransactionRepositoryInterface;
-use App\Modules\Transaction\Services\Contracts\DepositTransactionServiceInterface;
 
-class CreateTransactionService implements DepositTransactionServiceInterface
+class CreateTransactionService implements CreateTransactionServiceInterface
 {
     private TransactionRepositoryInterface $transactionRepository;
     private AccountRepositoryInterface $accountRepository;
