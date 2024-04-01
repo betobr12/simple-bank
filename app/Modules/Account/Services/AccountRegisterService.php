@@ -6,6 +6,7 @@ use App\Libraries\Document;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Libraries\GenerateAccount;
+use App\Modules\User\Repositories\Contracts\UserRepositoryInterface;
 use App\Modules\Person\Repositories\Contracts\PersonRepositoryInterface;
 use App\Modules\Account\Repositories\Contracts\AccountRepositoryInterface;
 use App\Modules\Company\Repositories\Contracts\CompanyRepositoryInterface;
@@ -18,6 +19,7 @@ class AccountRegisterService implements AccountRegisterServiceInterface
     private GenerateAccount $generateAccount;
     private CompanyRepositoryInterface $companyRepository;
     private PersonRepositoryInterface $personRepository;
+    private UserRepositoryInterface $userRepository;
 
     /**
      * @param Document $document
@@ -28,13 +30,15 @@ class AccountRegisterService implements AccountRegisterServiceInterface
         AccountRepositoryInterface $accountRepository,
         GenerateAccount $generateAccount,
         CompanyRepositoryInterface $companyRepository,
-        PersonRepositoryInterface $personRepository
+        PersonRepositoryInterface $personRepository,
+        UserRepositoryInterface $userRepository
     ) {
         $this->document = $document;
         $this->accountRepository = $accountRepository;
         $this->generateAccount = $generateAccount;
         $this->companyRepository = $companyRepository;
         $this->personRepository = $personRepository;
+        $this->userRepository = $userRepository;
     }
 
     /**
@@ -52,8 +56,6 @@ class AccountRegisterService implements AccountRegisterServiceInterface
      */
     public function accountRegister(Request $data): JsonResponse
     {
-        $user = auth()->user();
-
         $cpfCnpj = preg_replace('/[^0-9]/', '', $data->cpf_cnpj);
         $this->document->cpf_cnpj = $cpfCnpj;
 
@@ -63,25 +65,26 @@ class AccountRegisterService implements AccountRegisterServiceInterface
 
         $type = strlen($cpfCnpj) == 11 ? 2 : 1;
 
-        if ($this->accountRepository->get((object) [
+        if (!empty($userToAccount = $this->userRepository->firstUser((object)
+            [
+                'cpf' => $cpfCnpj
+            ])) == 0) {
+            return response()->json(['error' => 'Usuário não foi encontrado']);
+        }
+
+        if (count($this->accountRepository->get((object) [
             'cpf_cnpj' => $cpfCnpj
-        ])) {
+        ])) > 0) {
             return response()->json(['error' => 'CPF/CNPJ Cadastrado para outra conta']);
         }
 
-        if ($this->accountRepository->get((object) [
-            'user_id' => $user->id
-        ])) {
-            return response()->json(['error' => 'Conta já cadastrada para este usuário']);
-        }
-
         $this->generateAccount->cpf_cnpj = $cpfCnpj;
-        $this->generateAccount->id = $user->id;
-        $this->generateAccount->date = $user->created_at;
+        $this->generateAccount->id = $userToAccount->id;
+        $this->generateAccount->date = $userToAccount->created_at;
         $accountData = $this->generateAccount->accountNumber();
 
         if (!$account = $this->accountRepository->create([
-            'user_id' => $user->id,
+            'user_id' => $userToAccount->id,
             'cpf_cnpj' => $data->cpf_cnpj,
             'agency' => 1,
             'type_id' => $type,

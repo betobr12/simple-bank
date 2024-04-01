@@ -83,6 +83,18 @@ class Account extends Model
             ->when($this->account_id, function ($query, $account_id) {
                 return $query->where('accnts.id', '=', $account_id);
             })
+            ->when($this->cpf_cnpj, function ($query, $cpf_cnpj) {
+                return $query->where('accnts.cpf_cnpj', '=', $cpf_cnpj);
+            })
+            ->when($this->agency, function ($query, $agency) {
+                return $query->where('accnts.agency', '=', $agency);
+            })
+            ->when($this->number_account, function ($query, $number_account) {
+                return $query->where('accnts.number_account', '=', $number_account);
+            })
+            ->when($this->digit, function ($query, $digit) {
+                return $query->where('accnts.digit', '=', $digit);
+            })
             ->when($this->user_id, function ($query, $user_id) {
                 return $query->where('accnts.user_id', '=', $user_id);
             })

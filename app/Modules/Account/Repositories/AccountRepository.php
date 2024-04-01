@@ -14,6 +14,25 @@ class AccountRepository extends BaseRepository implements AccountRepositoryInter
     }
 
     /**
+     * @return mixed
+     */
+    public function getUserId()
+    {
+        return $this->model->user_id;
+    }
+
+    /**
+     * Set the user ID.
+     *
+     * @param mixed $userId
+     * @return void
+     */
+    public function setUserId($userId)
+    {
+        $this->model->user_id = $userId;
+    }
+
+    /**
      * @param $data
      */
     protected function parameters($data)
@@ -27,6 +46,7 @@ class AccountRepository extends BaseRepository implements AccountRepositoryInter
         $this->model->agency = $data->agency ?? null;
         $this->model->digit = $data->digit ?? null;
         $this->model->onlyActive = $data->onlyActive ?? 1;
+
     }
 
     /**

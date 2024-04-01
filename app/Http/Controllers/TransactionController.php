@@ -9,6 +9,7 @@ use App\CardTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Modules\Transaction\Services\DepositTransactionService;
+use App\Modules\Transaction\Services\TransferTransactionService;
 use App\Modules\Transaction\Services\BillPaymentTransactionService;
 use App\Modules\Transaction\Services\CellRechargeTransactionService;
 
@@ -44,70 +45,14 @@ class TransactionController extends Controller
 
     /**
      * @param Request $request
+     * @param TransferTransactionService $transferTransactionService
+     * @return mixed
      */
-    protected function transfer(Request $request)
-    {
-        if (!$user = Auth::user()) {
-            return response()->json(["error" => "Usuário não foi autenticado"]);
-        }
-
-        if (!$account = Account::where('user_id', '=', $user->id)->first()) {
-            return response()->json(["error" => "Usuário não possui uma conta"]);
-        }
-
-        if (!$account_favored = Account::where('cpf_cnpj', '=', $request->cpf_cnpj)->where('agency', '=', $request->agency)->where('number_account', '=', $request->number_account)->whereNull('deleted_at')->first()) {
-            return response()->json(["error" => "Favorecido informado não possui uma conta"]);
-        }
-
-        $transaction = new Transaction();
-        $transaction->account_id = $account->id;
-        $transaction->start_date = \Carbon\Carbon::now();
-        $balance = $transaction->getBalance();
-
-        if ($balance->balance < $request->value) {
-            return response()->json(["error" => "Saldo insuficiente, efetue um depósito"]);
-        }
-
-        if ($request->cpf_cnpj == $account->cpf_cnpj) {
-            return response()->json(["error" => "Você não pode transferir dinheiro para o seu CPF/CNPJ"]);
-        }
-
-        if (Transaction::create([
-            'account_id' => $account->id,
-            'user_id' => $user->id,
-            'type_transaction_id' => 4,
-            'value' => -$request->value,
-            'balance' => $balance->balance - $request->value,
-            'document' => $request->document,
-            'number_card' => null,
-            'number_phone' => null,
-            'description' => $request->description,
-            'date' => \Carbon\Carbon::now(),
-            'created_at' => \Carbon\Carbon::now()
-        ])) {
-
-            $transaction_favored = new Transaction();
-            $transaction_favored->account_id = $account_favored->id;
-            $transaction_favored->start_date = \Carbon\Carbon::now();
-            $balance_favored = $transaction_favored->getBalance();
-
-            if (Transaction::create([
-                'account_id' => $account_favored->id,
-                'user_id' => $account_favored->user_id,
-                'type_transaction_id' => 4,
-                'value' => $request->value,
-                'balance' => $balance_favored->balance + $request->value,
-                'document' => $request->document,
-                'number_card' => null,
-                'number_phone' => null,
-                'description' => "Credito transferência",
-                'date' => \Carbon\Carbon::now(),
-                'created_at' => \Carbon\Carbon::now()
-            ])) {
-                return response()->json(["success" => "Transferência efetuada com sucesso"]);
-            }
-        }
-        return response()->json(["error" => "Falha ao transferir o dinheiro"]);
+    protected function transfer(
+        Request $request,
+        TransferTransactionService $transferTransactionService
+    ) {
+        return $transferTransactionService->handler($request);
     }
 
     /**

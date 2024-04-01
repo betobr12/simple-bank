@@ -19,4 +19,9 @@ interface AccountRepositoryInterface extends BaseRepositoryInterface
      */
     public function get(object $data);
 
+    /**
+     * @param $userId
+     */
+    public function setUserId($userId);
+
 }

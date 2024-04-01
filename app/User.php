@@ -92,6 +92,7 @@ class User extends Authenticatable
     {
         return DB::table('users as usr')
             ->selectRaw("
+                usr.id,
                 usr.name,
                 usr.email,
                 usr.phone,
