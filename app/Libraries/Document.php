@@ -17,6 +17,7 @@ class Document
         if (strlen($this->cpf_cnpj) == 11) {
             return $this->validateCPF();
         }
+
         if (strlen($this->cpf_cnpj) == 14) {
             return $this->validateCNPJ();
         }
@@ -24,24 +25,34 @@ class Document
 
     public function validateCPF()
     {
-        $cpf = preg_replace('/[^0-9]/is', '', $this->cpf_cnpj);
-
-        if (strlen($cpf) != 11) {
-            return false;
-        }
+        $cpf = preg_replace('/[^0-9]/', '', $this->cpf_cnpj);
 
         if (preg_match('/(\d)\1{10}/', $cpf)) {
             return false;
         }
 
-        for ($t = 9; $t < 11; ++$t) {
-            for ($d = 0, $c = 0; $c < $t; ++$c) {
-                $d += $cpf[$c] * (($t + 1) - $c);
-            }
-            $d = ((10 * $d) % 11) % 10;
-            if ($cpf[$c] != $d) {
-                return false;
-            }
+        $sum = 0;
+        for ($i = 0; $i < 9; ++$i) {
+            $sum += $cpf[$i] * (10 - $i);
+        }
+
+        $remainder = $sum % 11;
+        $first_digit = ($remainder < 2) ? 0 : 11 - $remainder;
+
+        if ($cpf[9] != $first_digit) {
+            return false;
+        }
+
+        $sum = 0;
+        for ($i = 0; $i < 10; ++$i) {
+            $sum += $cpf[$i] * (11 - $i);
+        }
+
+        $remainder = $sum % 11;
+        $second_digit = ($remainder < 2) ? 0 : 11 - $remainder;
+
+        if ($cpf[10] != $second_digit) {
+            return false;
         }
         return true;
     }
@@ -49,40 +60,38 @@ class Document
     public function validateCNPJ()
     {
         $cnpj = preg_replace('/[^0-9]/', '', $this->cpf_cnpj);
-        if (preg_match('/(\d)\1{10}/', $cnpj)) {
-            return false;
-        }
-        $cnpj = (string) $cnpj;
-        $cnpj_original = $cnpj;
-        $primeiros_numeros_cnpj = substr($cnpj, 0, 12);
-        $primeiro_calculo = $this->multiplica_cnpj($primeiros_numeros_cnpj);
-        $primeiro_digito = ($primeiro_calculo % 11) < 2 ? 0 : 11 - ($primeiro_calculo % 11);
-        $primeiros_numeros_cnpj .= $primeiro_digito;
-        $segundo_calculo = $this->multiplica_cnpj($primeiros_numeros_cnpj, 6);
-        $segundo_digito = ($segundo_calculo % 11) < 2 ? 0 : 11 - ($segundo_calculo % 11);
-        $cnpj = $primeiros_numeros_cnpj . $segundo_digito;
-        if ($cnpj === $cnpj_original) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
-    /**
-     * @param $cnpj
-     * @param $posicao
-     * @return mixed
-     */
-    function multiplica_cnpj($cnpj, $posicao = 5)
-    {
-        $calculo = 0;
-        for ($i = 0; $i < strlen($cnpj); ++$i) {
-            $calculo = $calculo + ($cnpj[$i] * $posicao);
-            --$posicao;
-            if ($posicao < 2) {
-                $posicao = 9;
-            }
+        if (preg_match('/(\d)\1{13}/', $cnpj)) {
+            return false;
         }
-        return $calculo;
+
+        $sum = 0;
+        $weight = 5;
+        for ($i = 0; $i < 12; ++$i) {
+            $sum += $cnpj[$i] * $weight;
+            $weight = ($weight == 2) ? 9 : $weight - 1;
+        }
+
+        $remainder = $sum % 11;
+        $first_digit = ($remainder < 2) ? 0 : 11 - $remainder;
+
+        if ($cnpj[12] != $first_digit) {
+            return false;
+        }
+
+        $sum = 0;
+        $weight = 6;
+        for ($i = 0; $i < 13; ++$i) {
+            $sum += $cnpj[$i] * $weight;
+            $weight = ($weight == 2) ? 9 : $weight - 1;
+        }
+
+        $remainder = $sum % 11;
+        $second_digit = ($remainder < 2) ? 0 : 11 - $remainder;
+
+        if ($cnpj[13] != $second_digit) {
+            return false;
+        }
+        return true;
     }
 }

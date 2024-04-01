@@ -41,8 +41,8 @@ class LoginService implements LoginServiceInterface
 
         $this->document->cpf_cnpj = $cpf_cnpj;
 
-        if ($this->document->validateCPF() == false) {
-            return response()->json(["error" => "CPF invalido"]);
+        if ($this->document->validdateCpfOrCnpj() == false) {
+            return response()->json(["error" => "CPF ou CNPJ inválido"]);
         }
 
         $validator = Validator::make($data->all(), [
