@@ -5,13 +5,15 @@ namespace App\Libraries;
 class Phone
 {
 
+    /**
+     * @var mixed
+     */
     public $phone;
 
-    public function phone(){
-
+    public function phone()
+    {
         $this->phone = trim(str_replace('/', '', str_replace(' ', '', str_replace('-', '', str_replace(')', '', str_replace('(', '', $this->phone))))));
-
-        if ( strlen($this->phone) > 11  ) {
+        if (strlen($this->phone) > 11) {
             return false;
         }
 
@@ -19,8 +21,8 @@ class Phone
 
         if (preg_match($regexCel, $this->phone)) {
             return true;
-        }else{
-            return false;
         }
+        return false;
+
     }
 }
