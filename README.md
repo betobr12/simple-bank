@@ -1,10 +1,8 @@
-# System settings
-
-## Installing project
+# Installing project
 ## docker compose up -d --build
-# laravel settings
+# Laravel settings
 ## docker exec -it simple-bank bash
-## in docker bash
+# In docker bash
 - composer install
 - copy .env.exemple and change the file name to .env
 - php artisan config:cache
